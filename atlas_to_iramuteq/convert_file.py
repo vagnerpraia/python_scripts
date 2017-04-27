@@ -35,8 +35,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     list_rows = [x.replace('\n','') for x in open(path_interview_file).readlines()[15:] if x.split() != '\n']
     for row in list_rows:
         if '   (Super)' in row and flag:
-            key_clear = find_between(row, ':', ' - ').strip()
-            key_interview = find_between(key_clear, '', '.').strip()
+            key_interview = find_between(row, ':', ' - ').strip()
             
         else:
             if row[0:6] != 'Codes:' and row[0:8] != 'No memos' and row != '':
@@ -72,6 +71,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     for key_interview in interview_dict.keys():
         value_write = ''
         value_write_vazio = ''
+        key_interview = find_between(key_interview, '', '.').strip()
         if csv_values_dict.has_key(key_interview):
             for csv_list in csv_values_dict.get(key_interview):
                 if flag_header_vazio:
