@@ -6,7 +6,6 @@ Created on 2 de out de 2016
 @author: vagnerpraia
 '''
 
-import os
 import sys
 from csv import reader
 from util import find_between
@@ -28,11 +27,12 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     csv_values_dict = {}
     
     if path_result_file is None:
-        path_result_file = os.path.dirname(path_interview_file) + '/result.txt'
+        path_result_file = 'result.txt'
     
     # Leitura do arquivo de entrevista do Atlas
     flag = True
     list_rows = [x.replace('\n','') for x in open(path_interview_file).readlines()[15:] if x.split() != '\n']
+    key_interview = ''
     for row in list_rows:
         if '   (Super)' in row and flag:
             key_interview = find_between(row, ':', ' - ').strip()
@@ -100,12 +100,12 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
 
 if len(sys.argv) == 2 and sys.argv[1] == 'help':
     print 'Para utilizar o programa é necessário a passagem dos seguintes parâmetros:'
-    print '\n    Parâmetro 1 = Endereço do arquivo output do software Atlas.ti'
-    print '    Parâmetro 2 = Endereço do arquivo CSV com as escalas sociais'
-    print '    Parâmetro 3 (Opcional) = Diretório para onde o arquivo com o resultado do processamento será gravado'
-    print '\nObs.: Caso o parâmetro 3 não seja passado, o arquivo com o resultado do processamento será gravado no diretório do arquivo do parâmetro 1.'
+    print '\n    Parâmetro 1 = Endereço do arquivo output do software Atlas.ti.'
+    print '    Parâmetro 2 = Endereço do arquivo CSV com as escalas sociais.'
+    print '    Parâmetro 3 (Opcional) = Endereço do arquivo onde o resultado do processamento será gravado.'
+    print '\nObs.: Caso o parâmetro 3 não seja passado, o arquivo com o resultado do processamento será criado no diretório que está sendo acessado pelo console com o nome result.txt.'
     print '\n\nExemplo:'
-    print '\n    ' + sys.argv[0] + ' C:/PBF_quotes.txt C:/escala social csv.csv C:/IRaMuTeq'
+    print '\n    ' + sys.argv[0] + ' C:/PBF_quotes.txt C:/escala_social.csv C:/IRaMuTeq'
     
 elif len(sys.argv) == 3:
     convert_file(sys.argv[1], sys.argv[2])
