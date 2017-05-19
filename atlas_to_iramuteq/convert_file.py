@@ -36,6 +36,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     for row in list_rows:
         if '   (Super)' in row and flag:
             key_interview = find_between(row, ':', ' - ').strip()
+            if '.' in key_interview: key_interview = find_between(key_interview, '', '.').strip()
             
         else:
             if row[0:6] != 'Codes:' and row[0:8] != 'No memos' and row != '':
@@ -50,7 +51,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     # Leitura do arquivo CSV
     flag_header = True
     with open(path_csv_file, 'r') as f:
-        for row in reader(f, delimiter = ';'):
+        for row in reader(f, delimiter = ','):
             if flag_header:
                 csv_header_list.extend(row)
             else:
@@ -71,7 +72,9 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     for key_interview in interview_dict.keys():
         value_write = ''
         value_write_vazio = ''
-        key_interview = find_between(key_interview, '', '.').strip()
+        
+        if '.' in key_interview: key_interview = find_between(key_interview, '', '.').strip()
+		
         if csv_values_dict.has_key(key_interview):
             for csv_list in csv_values_dict.get(key_interview):
                 if flag_header_vazio:
@@ -93,9 +96,9 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                 if header.has_key(key_interview):
                     f.write(header.get(key_interview))
                 else:
-                    f.write(header.get('vazio'))
+                	f.write(header.get('vazio'))
                 f.write(str(value) + '\n')
-
+    
 
 
 if len(sys.argv) == 2 and sys.argv[1] == 'help':
