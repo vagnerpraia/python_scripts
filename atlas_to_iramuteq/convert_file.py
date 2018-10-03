@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 '''
 Created on 2 de out de 2016
@@ -8,7 +8,30 @@ Created on 2 de out de 2016
 
 import sys
 from csv import reader
-from util import find_between
+from re import sub
+
+def find_between(s, first, last):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+def find_between_r(s, first, last):
+    try:
+        start = s.rindex( first ) + len( first )
+        end = s.rindex( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+def strip_non_ascii(text):
+    '''
+    stripped = (c for c in text if 0 < ord(c) < 127)
+    return ''.join(stripped)
+    '''
+    return sub(r'[^\x00-\xa3]', r'', text)
 
 def adjust_string(string):
     string = string.replace('"', '')
@@ -66,7 +89,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
             
             flag_header = False
     
-    # Prepara os cabeçalhos
+    # Prepara os cabeÃ§alhos
     header = {}
     flag_header_vazio = True
     for key_interview in interview_dict.keys():
@@ -90,23 +113,23 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     
     # Escrita do arquivo resultado
     with open(path_result_file, 'w') as f:
-        f.write('\n')
         for key_interview, value_interview in interview_dict.items():
             for value in value_interview:
                 if header.has_key(key_interview):
                     f.write(header.get(key_interview))
                 else:
-                	f.write(header.get('vazio'))
+                    if 'vazio' in header:
+                	    f.write(header.get('vazio'))
                 f.write(str(value) + '\n')
     
 
 
 if len(sys.argv) == 2 and sys.argv[1] == 'help':
-    print 'Para utilizar o programa é necessário a passagem dos seguintes parâmetros:'
-    print '\n    Parâmetro 1 = Endereço do arquivo output do software Atlas.ti.'
-    print '    Parâmetro 2 = Endereço do arquivo CSV com as escalas sociais.'
-    print '    Parâmetro 3 (Opcional) = Endereço do arquivo onde o resultado do processamento será gravado.'
-    print '\nObs.: Caso o parâmetro 3 não seja passado, o arquivo com o resultado do processamento será criado no diretório que está sendo acessado pelo console com o nome result.txt.'
+    print 'Para utilizar o programa Ã© necessÃ¡rio a passagem dos seguintes parÃ¢metros:'
+    print '\n    ParÃ¢metro 1 = EndereÃ§o do arquivo output do software Atlas.ti.'
+    print '    ParÃ¢metro 2 = EndereÃ§o do arquivo CSV com as escalas sociais.'
+    print '    ParÃ¢metro 3 (Opcional) = EndereÃ§o do arquivo onde o resultado do processamento serÃ¡ gravado.'
+    print '\nObs.: Caso o parÃ¢metro 3 nÃ£o seja passado, o arquivo com o resultado do processamento serÃ¡ criado no diretÃ³rio que estÃ¡ sendo acessado pelo console com o nome result.txt.'
     print '\n\nExemplo:'
     print '\n    ' + sys.argv[0] + ' C:/PBF_quotes.txt C:/escala_social.csv C:/IRaMuTeq'
     
@@ -117,4 +140,4 @@ elif len(sys.argv) == 4:
     convert_file(sys.argv[1], sys.argv[2], sys.argv[3])
     
 else:
-    print 'Comando inválido. Utilize o comando \'' + sys.argv[0] + ' help\' para ter mais informações.'
+    print 'Comando invÃ¡lido. Utilize o comando \'' + sys.argv[0] + ' help\' para ter mais informaÃ§Ãµes.'
