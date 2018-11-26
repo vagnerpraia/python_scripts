@@ -6,22 +6,22 @@ Created on 2 de out de 2016
 @author: vagnerpraia
 '''
 
+import re
 import sys
 from csv import reader
-from re import sub
 
 def find_between(s, first, last):
     try:
-        start = s.index( first ) + len( first )
-        end = s.index( last, start )
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
         return s[start:end]
     except ValueError:
         return ""
 
 def find_between_r(s, first, last):
     try:
-        start = s.rindex( first ) + len( first )
-        end = s.rindex( last, start )
+        start = s.rindex(first) + len(first)
+        end = s.rindex(last, start)
         return s[start:end]
     except ValueError:
         return ""
@@ -31,7 +31,7 @@ def strip_non_ascii(text):
     stripped = (c for c in text if 0 < ord(c) < 127)
     return ''.join(stripped)
     '''
-    return sub(r'[^\x00-\xa3]', r'', text)
+    return re.sub(r'[^\x00-\xa3]', r'', text)
 
 def adjust_string(string):
     string = string.replace('"', '')
@@ -54,11 +54,28 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     
     # Leitura do arquivo de entrevista do Atlas
     flag = True
-    list_rows = [x.replace('\n','') for x in open(path_interview_file).readlines()[15:] if x.split() != '\n']
+
+    list_rows = open(path_interview_file).readlines()
+    flagVersion = re.match(r'Report: [0-9]* quotation\(s\) for [0-9]* code(.*)?', row, re.M|re.I)
+
+    if flagVersion:
+        list_rows = [x.replace('\n','') for x in list_rows[15:] if x.split() != '\n']
+
     key_interview = ''
     for row in list_rows:
-        if '   (Super)' in row and flag:
-            key_interview = find_between(row, ':', ' - ').strip()
+        flagRegex = re.match(r'([0-9]*):([0-9]*) .*', row, re.M|re.I)
+        flagInString = '   (Super)' in row
+
+        if (flagRegex or flagInString) and flag:
+            regexSearch = re.search(r' - . [0-9]*: ', row, re.M|re.I)
+            if regexSearch:
+                keyStart = regexSearch.group()
+                keyEnd = row[len(row) - 1]
+            else:
+                keyStart = ':'
+                keyEnd = ' - '
+
+            key_interview = find_between(row, keyStart, keyEnd).strip()
             if '.' in key_interview: key_interview = find_between(key_interview, '', '.').strip()
             
         else:
@@ -131,7 +148,7 @@ if len(sys.argv) == 2 and sys.argv[1] == 'help':
     print '    Parâmetro 3 (Opcional) = Endereço do arquivo onde o resultado do processamento será gravado.'
     print '\nObs.: Caso o parâmetro 3 não seja passado, o arquivo com o resultado do processamento será criado no diretório que está sendo acessado pelo console com o nome result.txt.'
     print '\n\nExemplo:'
-    print '\n    ' + sys.argv[0] + ' C:/PBF_quotes.txt C:/escala_social.csv C:/IRaMuTeq'
+    print '\n    ' + sys.argv[0] + ' C:/Teste/atlas_to_iramuteq/questionario.txt C:/Teste/atlas_to_iramuteq/escala.csv C:/Teste/atlas_to_iramuteq/resultado.txt'
     
 elif len(sys.argv) == 3:
     convert_file(sys.argv[1], sys.argv[2])
