@@ -56,7 +56,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     flag = True
 
     list_rows = open(path_interview_file).readlines()
-    flagVersion = re.match(r'Report: [0-9]* quotation\(s\) for [0-9]* code(.*)?', row, re.M|re.I)
+    flagVersion = re.match(r'Report: [0-9]* quotation\(s\) for [0-9]* code(.*)?', list_rows[1], re.M|re.I)
 
     if flagVersion:
         list_rows = [x.replace('\n','') for x in list_rows[15:] if x.split() != '\n']
@@ -76,7 +76,10 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                 keyEnd = ' - '
 
             key_interview = find_between(row, keyStart, keyEnd).strip()
-            if '.' in key_interview: key_interview = find_between(key_interview, '', '.').strip()
+            if '.' in key_interview:
+                key_interview = find_between(key_interview, '', '.').strip()
+            if re.match(r'[0-9]*e', key_interview, re.M|re.I):
+                key_interview = key_interview[:-1]
             
         else:
             if row[0:6] != 'Codes:' and row[0:8] != 'No memos' and row != '':
@@ -102,7 +105,11 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                     csv_values_list.append(value_output)
                     count_columns += 1
                 
-                csv_values_dict.update({row[0] : csv_values_list})
+                key_csv = row[0]
+                if re.match(r'[0-9]*e', key_csv, re.M|re.I):
+                    key_csv = key_csv[:-1]
+                
+                csv_values_dict.update({key_csv : csv_values_list})
             
             flag_header = False
     
@@ -138,7 +145,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                     if 'vazio' in header:
                 	    f.write(header.get('vazio'))
                 f.write(str(value) + '\n')
-    
+
 
 
 if len(sys.argv) == 2 and sys.argv[1] == 'help':
