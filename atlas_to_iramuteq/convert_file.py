@@ -144,7 +144,7 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                 else:
                     if 'vazio' in header:
                 	    f.write(header.get('vazio'))
-                f.write(str(value) + '\n')
+                f.write(str(value))
 
 
 
