@@ -6,9 +6,27 @@ Created on 2 de out de 2016
 @author: vagnerpraia
 '''
 
+import codecs
 import re
 import sys
 from csv import reader
+
+def check_encoding(path_file):
+    result = ''
+
+    encodings = ['utf-8', 'us-ascii', 'iso-8859-1', 'windows-1250', 'windows-1252']
+    for e in encodings:
+        try:
+            fh = codecs.open(path_file, 'r', encoding = e)
+            fh.readlines()
+            fh.seek(0)
+        except UnicodeDecodeError:
+            None
+        else:
+            result = e
+            break
+
+    return result
 
 def find_between(s, first, last):
     try:
@@ -27,10 +45,6 @@ def find_between_r(s, first, last):
         return ""
 
 def strip_non_ascii(text):
-    '''
-    stripped = (c for c in text if 0 < ord(c) < 127)
-    return ''.join(stripped)
-    '''
     return re.sub(r'[^\x00-\xa3]', r'', text)
 
 def adjust_string(string):
@@ -55,11 +69,15 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
     # Leitura do arquivo de entrevista do Atlas
     flag = True
 
-    list_rows = open(path_interview_file).readlines()
+    enc = check_encoding(path_interview_file)
+    list_rows = codecs.open(path_interview_file, 'r', enc).readlines()
     flagVersion = re.match(r'Report: [0-9]* quotation\(s\) for [0-9]* code(.*)?', list_rows[1], re.M|re.I)
 
     if flagVersion:
-        list_rows = [x.replace('\n','') for x in list_rows[15:] if x.split() != '\n']
+        if enc == 'utf-8':
+            list_rows = [x.replace('\x0A','') for x in list_rows[15:] if x.split() != '\x0A']
+        else:
+            list_rows = [x.replace('\n','') for x in list_rows[15:] if x.split() != '\n']            
 
     key_interview = ''
     for row in list_rows:
@@ -144,6 +162,9 @@ def convert_file(path_interview_file, path_csv_file, path_result_file = None):
                 else:
                     if 'vazio' in header:
                 	    f.write(header.get('vazio'))
+                #value.decode(enc).encode('iso-8859-1')
+                value = value.encode('utf-8')
+                #value = unicode(value).encode('iso-8859-1')
                 f.write(str(value))
 
 
